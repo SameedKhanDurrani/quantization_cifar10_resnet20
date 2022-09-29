@@ -14,8 +14,6 @@ def unpickle(file):
 def create_dataset(foldername, filename):
     path = os.path.join(foldername, filename)
     dataset_details = unpickle(path)
-    for key, val in dataset_details.items():
-        print(key)
 
     try:
         os.mkdir(dataset_details[b'batch_label'])
@@ -23,11 +21,26 @@ def create_dataset(foldername, filename):
         print(error)
 
     for image_name, image in zip(dataset_details[b'filenames'], dataset_details[b'data']):
-        im = Image.fromarray(np.transpose(np.reshape(image,(3, 32,32)), (1,2,0)))
+        im = Image.fromarray(np.transpose(np.reshape(image, (3, 32,32)), (1,2,0)))
         im.save(os.path.join(dataset_details[b'batch_label'].decode("utf-8"), image_name.decode("utf-8")))
 
     with open(os.path.join(dataset_details[b'batch_label'].decode("utf-8"), "labels.txt"), "w") as f:
         for label in dataset_details[b'labels']:
+            f.write(str(label) + "\n")
+
+    # ______________ Generate Sample Dataset ________________________
+
+    try:
+        os.mkdir("sample_"+dataset_details[b'batch_label'].decode("utf-8"))
+    except OSError as error:
+        print(error)
+
+    for image_name, image in zip(dataset_details[b'filenames'][:5], dataset_details[b'data'][:5]):
+        im = Image.fromarray(np.transpose(np.reshape(image, (3, 32,32)), (1,2,0)))
+        im.save(os.path.join("sample_"+dataset_details[b'batch_label'].decode("utf-8"), image_name.decode("utf-8")))
+
+    with open(os.path.join("sample_"+dataset_details[b'batch_label'].decode("utf-8"), "labels.txt"), "w") as f:
+        for label in dataset_details[b'labels'][:5]:
             f.write(str(label) + "\n")
 
 
